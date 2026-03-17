@@ -1,0 +1,14 @@
+baseURL = "http://localhost/"
+title = "Test Site"
+theme = []
+
+[module]
+  [[module.imports]]
+    path = "github.com/jt55401/hugo-kagi-smallweb"
+
+[params.kagiSmallWeb]
+  enabled      = true
+  # http://0x80.pl/feed.xml is the first entry in smallweb.txt
+  # Using it as a known-valid feedUrl for integration testing
+  feedUrl      = "http://0x80.pl/feed.xml"
+  badgeVariant = 1
