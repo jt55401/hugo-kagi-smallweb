@@ -69,13 +69,26 @@
     {{- $nextHome = printf "%s://%s" $nextParsed.Scheme $nextParsed.Host -}}
   {{- end -}}
 
-  {{- if and $prevHome $nextHome -}}
+  {{/* Build random pool: shuffle all entries except our own, take up to 5, extract homepages */}}
+  {{- $others := slice -}}
+  {{- range $lines -}}
+    {{- if ne . $feedUrl -}}{{- $others = $others | append . -}}{{- end -}}
+  {{- end -}}
+  {{- $poolHomes := slice -}}
+  {{- range (first 5 (shuffle $others)) -}}
+    {{- $p := urls.Parse . -}}
+    {{- if and $p.Scheme $p.Host -}}
+      {{- $poolHomes = $poolHomes | append (printf "%s://%s" $p.Scheme $p.Host) -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- if and $prevHome $nextHome $poolHomes -}}
 <div class="kagi-smallweb-bar">
   <a href="{{ $prevHome }}" rel="noopener noreferrer" target="_blank">← {{ $prevParsed.Host }}</a>
   <span class="ksw-sep">·</span>
   <a href="https://kagi.com/smallweb" rel="noopener noreferrer" target="_blank">⬡ Kagi Small Web</a>
   <span class="ksw-sep">·</span>
-  <a href="https://kagi.com/smallweb" rel="noopener noreferrer" target="_blank">Browse</a>
+  <a href="#" data-ksw-pool='{{ $poolHomes | jsonify }}' onclick="var p=JSON.parse(this.dataset.kswPool);window.open(p[Math.floor(Math.random()*p.length)],'_blank','noopener,noreferrer');return false;">Random</a>
   <span class="ksw-sep">·</span>
   <a href="{{ $nextHome }}" rel="noopener noreferrer" target="_blank">{{ $nextParsed.Host }} →</a>
 </div>
