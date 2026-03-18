@@ -83,6 +83,33 @@ Add to any layout where you want the prev/next navigation:
 
 > **Note:** Hugo normalizes all `params` keys to lowercase internally. The keys above are shown in their TOML/config form (`feedUrl`, `kagiSmallWeb`); in template code they appear as `feedurl` and `kagismallweb`. This is handled automatically — you do not need to change your config.
 
+## Git-based caching (optional)
+
+By default the module fetches `smallweb.txt` from GitHub over HTTP at build time. To avoid the HTTP call and cache the list in git instead:
+
+1. Add `kagisearch/smallweb` as a git submodule in your site's `assets/` directory:
+
+   ```bash
+   git submodule add --depth=1 https://github.com/kagisearch/smallweb.git assets/kagi-smallweb
+   ```
+
+2. Set `smallwebTxtPath` in your config:
+
+   ```toml
+   [params.kagiSmallWeb]
+     smallwebTxtPath = "kagi-smallweb/smallweb.txt"
+   ```
+
+3. To update the cached list:
+
+   ```bash
+   git submodule update --remote assets/kagi-smallweb
+   git add assets/kagi-smallweb
+   git commit -m "chore: update smallweb list"
+   ```
+
+When `smallwebTxtPath` is set, no HTTP requests are made during `hugo build`.
+
 ## Keeping the site list fresh
 
 The `smallweb.txt` list is cached by Hugo at build time based on HTTP cache headers. To force a fresh fetch:
