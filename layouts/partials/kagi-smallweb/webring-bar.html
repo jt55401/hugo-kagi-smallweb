@@ -1,0 +1,89 @@
+{{- $params := .Site.Params.kagismallweb -}}
+{{- if and $params $params.enabled $params.feedurl -}}
+
+{{/* Fetch smallweb.txt from GitHub */}}
+{{- $url := "https://raw.githubusercontent.com/kagisearch/smallweb/main/smallweb.txt" -}}
+{{- $result := try (resources.GetRemote $url) -}}
+{{- with $result.Err -}}
+  {{- warnf "kagi-smallweb: failed to fetch smallweb.txt: %s" . -}}
+{{- else -}}
+  {{- with $result.Value -}}
+
+    {{/* Parse lines, filtering blanks */}}
+    {{- $feedUrl := $params.feedurl -}}
+    {{- $lines := slice -}}
+    {{- range split .Content "\n" -}}
+      {{- $line := trim . " \r" -}}
+      {{- if $line -}}{{- $lines = $lines | append $line -}}{{- end -}}
+    {{- end -}}
+    {{- $total := len $lines -}}
+
+    {{/* Find index of feedUrl — use scratch for mutable state in range */}}
+    {{- $s := newScratch -}}
+    {{- $s.Set "idx" -1 -}}
+    {{- range $i, $line := $lines -}}
+      {{- if eq $line $feedUrl -}}{{- $s.Set "idx" $i -}}{{- end -}}
+    {{- end -}}
+    {{- $idx := $s.Get "idx" -}}
+
+    {{- if lt $idx 0 -}}
+      {{/* feedUrl not found in list */}}
+      {{- warnf "kagi-smallweb: feedUrl %q not found in smallweb.txt — is your RSS URL listed exactly?" $feedUrl -}}
+    {{- else if lt $total 2 -}}
+      {{/* Degenerate: 0 or 1 entry, nothing useful to show */}}
+    {{- else -}}
+
+      {{/* Compute prev/next indices with wraparound */}}
+      {{- $prevIdx := mod (add (sub $idx 1) $total) $total -}}
+      {{- $nextIdx := mod (add $idx 1) $total -}}
+
+      {{/* Extract homepage URLs from feed URLs */}}
+      {{- $prevFeed := index $lines $prevIdx -}}
+      {{- $nextFeed := index $lines $nextIdx -}}
+      {{- $prevParsed := urls.Parse $prevFeed -}}
+      {{- $nextParsed := urls.Parse $nextFeed -}}
+      {{- $prevHome := "" -}}
+      {{- $nextHome := "" -}}
+      {{- if and $prevParsed.Scheme $prevParsed.Host -}}
+        {{- $prevHome = printf "%s://%s" $prevParsed.Scheme $prevParsed.Host -}}
+      {{- end -}}
+      {{- if and $nextParsed.Scheme $nextParsed.Host -}}
+        {{- $nextHome = printf "%s://%s" $nextParsed.Scheme $nextParsed.Host -}}
+      {{- end -}}
+
+      {{- if and $prevHome $nextHome -}}
+<style>
+.kagi-smallweb-bar {
+  font-family: monospace;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid currentColor;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.kagi-smallweb-bar a {
+  color: inherit;
+  text-decoration: none;
+}
+.kagi-smallweb-bar a:hover { text-decoration: underline; }
+.kagi-smallweb-bar .ksw-sep { opacity: 0.4; }
+</style>
+<div class="kagi-smallweb-bar">
+  <a href="{{ $prevHome }}" rel="noopener noreferrer" target="_blank">← {{ $prevParsed.Host }}</a>
+  <span class="ksw-sep">·</span>
+  <a href="https://kagi.com/smallweb" rel="noopener noreferrer" target="_blank">⬡ Kagi Small Web</a>
+  <span class="ksw-sep">·</span>
+  <a href="https://kagi.com/smallweb" rel="noopener noreferrer" target="_blank">Random</a>
+  <span class="ksw-sep">·</span>
+  <a href="{{ $nextHome }}" rel="noopener noreferrer" target="_blank">{{ $nextParsed.Host }} →</a>
+</div>
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
