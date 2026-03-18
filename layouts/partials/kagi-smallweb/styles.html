@@ -2,17 +2,23 @@
 {{- if and $params $params.enabled -}}
 <style>
 .kagi-smallweb-bar {
-  font-family: monospace;
-  font-size: 0.8rem;
   text-align: center;
   padding: 0.5rem 1rem;
-  border-top: 1px solid currentColor;
-  opacity: 0.6;
+  opacity: 0.8;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+  background-color: #e3e3e3;
+}
+body.colorscheme-dark .kagi-smallweb-bar {
+  background-color: #383838;
+}
+@media (prefers-color-scheme: dark) {
+  body.colorscheme-auto .kagi-smallweb-bar {
+    background-color: #383838;
+  }
 }
 .kagi-smallweb-bar a {
   color: inherit;
