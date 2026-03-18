@@ -1,0 +1,10 @@
+{{- $params := .Site.Params.kagismallweb -}}
+{{- if and $params $params.enabled -}}
+{{- $variant1 := "https://kagifeedback.org/assets/files/2025-11-27/1764250973-708369-88x31-2.gif" -}}
+{{- $variant2 := "https://kagifeedback.org/assets/files/2025-11-27/1764251027-352511-88x31-4.gif" -}}
+{{- $src := $variant1 -}}
+{{- if eq (int ($params.badgeVariant | default 1)) 2 -}}{{- $src = $variant2 -}}{{- end -}}
+<a href="https://kagi.com/smallweb" rel="noopener noreferrer" title="Member of Kagi Small Web">
+  <img src="{{ $src }}" alt="Kagi Small Web Member" width="88" height="31" style="border:none;display:inline-block;">
+</a>
+{{- end -}}
