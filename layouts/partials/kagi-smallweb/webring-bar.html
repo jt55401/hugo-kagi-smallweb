@@ -82,11 +82,17 @@
     {{- end -}}
   {{- end -}}
 
+  {{/* Resolve badge image src */}}
+  {{- $variant1 := "https://kagifeedback.org/assets/files/2025-11-27/1764250973-708369-88x31-2.gif" -}}
+  {{- $variant2 := "https://kagifeedback.org/assets/files/2025-11-27/1764251027-352511-88x31-4.gif" -}}
+  {{- $badgeSrc := $variant1 -}}
+  {{- if eq (int ($params.badgevariant | default 1)) 2 -}}{{- $badgeSrc = $variant2 -}}{{- end -}}
+
   {{- if and $prevHome $nextHome $poolHomes -}}
 <div class="kagi-smallweb-bar">
   <a href="{{ $prevHome }}" rel="noopener noreferrer" target="_blank">← {{ $prevParsed.Host }}</a>
   <span class="ksw-sep">·</span>
-  <a href="https://kagi.com/smallweb" rel="noopener noreferrer" target="_blank">⬡ Kagi Small Web</a>
+  <a href="https://kagi.com/smallweb" rel="noopener noreferrer" target="_blank" title="Kagi Small Web"><img src="{{ $badgeSrc }}" alt="Kagi Small Web" width="88" height="31" style="border:none;display:inline-block;vertical-align:middle;"></a>
   <span class="ksw-sep">·</span>
   <a href="#" data-ksw-pool='{{ $poolHomes | jsonify }}' onclick="var p=JSON.parse(this.dataset.kswPool);window.open(p[Math.floor(Math.random()*p.length)],'_blank','noopener,noreferrer');return false;">Random</a>
   <span class="ksw-sep">·</span>
